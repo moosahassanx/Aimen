@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>💌 A Question For You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rose:    #e8416a;
+      --rose-lt: #f7a8be;
+      --blush:   #fce4ec;
+      --cream:   #fff8f0;
+      --dark:    #2b1b2e;
+      --gold:    #d4a04a;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--cream);
+      font-family: 'Lato', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── floating petals ── */
+    .petal {
+      position: fixed;
+      width: 12px; height: 12px;
+      border-radius: 0 50% 50% 50%;
+      opacity: 0;
+      animation: fall linear infinite;
+      pointer-events: none;
+    }
+    @keyframes fall {
+      0%   { transform: translateY(-40px) rotate(0deg);   opacity: .8; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0;  }
+    }
+
+    /* ── card ── */
+    .card {
+      position: relative;
+      background: #fff;
+      border-radius: 24px;
+      padding: 56px 48px 48px;
+      max-width: 480px;
+      width: 92vw;
+      text-align: center;
+      box-shadow: 0 8px 48px rgba(232,65,106,.18), 0 2px 8px rgba(0,0,0,.06);
+      animation: riseIn .9s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes riseIn {
+      from { opacity:0; transform: translateY(40px) scale(.96); }
+      to   { opacity:1; transform: translateY(0)    scale(1);   }
+    }
+
+    /* gold top border */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      border: 2px solid transparent;
+      background: linear-gradient(135deg, var(--gold), var(--rose-lt), var(--gold)) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: destination-out;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* big heart icon */
+    .heart-icon {
+      font-size: 64px;
+      display: block;
+      animation: pulse 1.4s ease-in-out infinite;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 12px rgba(232,65,106,.35));
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.12); }
+    }
+
+    /* question */
+    .question {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.55rem, 5vw, 2rem);
+      color: var(--dark);
+      line-height: 1.35;
+      margin-bottom: 10px;
+      min-height: 2.8em;
+      transition: opacity .3s;
+    }
+    .sub {
+      font-size: .85rem;
+      color: #b07090;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+      min-height: 1.2em;
+    }
+
+    /* buttons */
+    .buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 14px 36px;
+      border-radius: 50px;
+      border: none;
+      font-family: 'Lato', sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .2s;
+      white-space: nowrap;
+    }
+    .btn-yes {
+      background: linear-gradient(135deg, var(--rose), #c0325a);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(232,65,106,.4);
+    }
+    .btn-yes:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 24px rgba(232,65,106,.5); }
+    .btn-yes:active { transform: scale(.97); }
+
+    .btn-no {
+      background: var(--blush);
+      color: var(--rose);
+      border: 1.5px solid var(--rose-lt);
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+    }
+    .btn-no:hover { background: #fce8ef; }
+
+    /* ── YES screen ── */
+    #yes-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(160deg, #fce4ec 0%, #fff0f5 60%, #fce4ec 100%);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      animation: fadeIn .6s ease both;
+      padding: 24px;
+      text-align: center;
+    }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+    .yes-hearts {
+      font-size: 80px;
+      animation: bigPulse 1.2s ease-in-out infinite;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 6px 20px rgba(232,65,106,.4));
+    }
+    @keyframes bigPulse {
+      0%,100% { transform: scale(1)    rotate(-3deg); }
+      50%      { transform: scale(1.15) rotate(3deg);  }
+    }
+    .yes-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      color: var(--rose);
+      margin-bottom: 12px;
+    }
+    .yes-sub {
+      font-size: 1.1rem;
+      color: #9b4565;
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* confetti canvas */
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  </style>
+</head>
+<body>
+
+<!-- floating petals (injected by JS) -->
+
+<div class="card" id="card">
+  <span class="heart-icon">💝</span>
+  <div class="question" id="question">Will you be my Valentine?</div>
+  <div class="sub" id="sub">— a question just for you —</div>
+  <div class="buttons">
+    <button class="btn btn-yes" id="yes-btn" onclick="handleYes()">Yes 💖</button>
+    <button class="btn btn-no"  id="no-btn"  onclick="handleNo()">No</button>
+  </div>
+</div>
+
+<div id="yes-screen">
+  <canvas id="confetti"></canvas>
+  <div class="yes-hearts">💗</div>
+  <div class="yes-title">Yay! I'm so happy! 🥰</div>
+  <div class="yes-sub">You just made me the luckiest person alive.</div>
+</div>
+
+<script>
+  /* ── petals ── */
+  const petalColors = ['#e8416a','#f7a8be','#fce4ec','#d4a04a','#fbb6ce'];
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.cssText = `
+      left:${Math.random()*100}vw;
+      top:${Math.random()*-40}px;
+      background:${petalColors[Math.floor(Math.random()*petalColors.length)]};
+      width:${8+Math.random()*10}px;
+      height:${8+Math.random()*10}px;
+      animation-duration:${4+Math.random()*6}s;
+      animation-delay:${Math.random()*6}s;
+    `;
+    document.body.appendChild(p);
+  }
+
+  /* ── No button logic ── */
+  const noMessages = [
+    "Are you sure? 🥺",
+    "Pretty please? 🙏",
+    "Think again! 💕",
+    "Wrong answer! 😅",
+    "Last chance…? 👀",
+    "Come on… 🥹",
+    "I'll ask forever! 💌",
+    "Okay… one more time 😂",
+    "Still no?? 😭",
+    "I believe in you! 💪",
+  ];
+  const noSubs = [
+    "reconsider, please…",
+    "my heart is on the line",
+    "i made you cookies 🍪",
+    "you know you want to",
+    "seriously reconsidering here",
+    "this button is cursed",
+    "just say yes already!",
+    "infinite loop activated",
+    "still waiting… 🕰️",
+    "ok but really though",
+  ];
+  let noCount = 0;
+
+  function handleNo() {
+    noCount++;
+    const q = document.getElementById('question');
+    const s = document.getElementById('sub');
+    const noBtn = document.getElementById('no-btn');
+
+    // fade out
+    q.style.opacity = '0';
+    s.style.opacity = '0';
+
+    setTimeout(() => {
+      q.textContent = noMessages[(noCount - 1) % noMessages.length];
+      s.textContent = '— ' + noSubs[(noCount - 1) % noSubs.length] + ' —';
+      q.style.opacity = '1';
+      s.style.opacity = '1';
+    }, 280);
+
+    // shrink No button over time (capped at 60% smaller)
+    const scale = Math.max(0.4, 1 - noCount * 0.06);
+    noBtn.style.transform = `scale(${scale})`;
+    noBtn.style.opacity = Math.max(0.35, 1 - noCount * 0.07);
+  }
+
+  /* ── Yes ── */
+  function handleYes() {
+    document.getElementById('card').style.display = 'none';
+    const ys = document.getElementById('yes-screen');
+    ys.style.display = 'flex';
+    launchConfetti();
+  }
+
+  /* ── Confetti ── */
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = Array.from({length: 130}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: 5 + Math.random() * 8,
+      color: ['#e8416a','#f7a8be','#fce4ec','#d4a04a','#c0325a','#fff'][Math.floor(Math.random()*6)],
+      rot: Math.random() * Math.PI * 2,
+      vx: (Math.random() - .5) * 3,
+      vy: 1.5 + Math.random() * 3,
+      vr: (Math.random() - .5) * .15,
+    }));
+
+    let frame;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r * 1.6);
+        ctx.restore();
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+      });
+      frame = requestAnimationFrame(draw);
+    }
+    draw();
+    setTimeout(() => cancelAnimationFrame(frame), 6000);
+  }
+</script>
+</body>
+</html>
